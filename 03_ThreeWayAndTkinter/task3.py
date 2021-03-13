@@ -8,21 +8,20 @@ def to_two_coords(coord):
     return coord // LEN, coord % LEN
 
 class Application(tk.Frame):
-    def __init__(self, master=None):
+    def __init__(self, master = None):
         super().__init__(master)
         self.grid(sticky = 'NEWS')
+        top = self.winfo_toplevel()
+        top.rowconfigure(0, weight = 1)
+        top.columnconfigure(0, weight = 1)
+        for i in range(LEN):
+            self.columnconfigure(i, weight = 1, uniform = 'col')
+            self.rowconfigure(i + 1, weight = 1, uniform = 'row')
         self.createWidgets()
 
     def createWidgets(self):
-        top = self.winfo_toplevel()
-        top.rowconfigure(0, weight=1)
-        top.columnconfigure(0, weight=1)
-        for i in range(LEN):
-            self.columnconfigure(i, weight=1)
-            self.rowconfigure(i + 1, weight=1)
-
         self.newButton = tk.Button(self, text = 'New', command = self.new_field)
-        self.quitButton = tk.Button(self, text = 'Exit', command= self.quit)
+        self.quitButton = tk.Button(self, text = 'Exit', command = self.quit)
         self.newButton.grid(row = 0, column = 0, columnspan = LEN // 2, sticky = 'NEWS')
         self.quitButton.grid(row = 0, column = LEN // 2, columnspan = LEN // 2, sticky = 'NEWS')
         self.buttons = list()
@@ -38,6 +37,23 @@ class Application(tk.Frame):
         for position, button in zip(self.positions, self.buttons):
             row, column = to_two_coords(position)
             button.grid(row = row + 1, column = column, sticky = 'NEWS')
+        if not self.check_field():
+            self.new_field()
+
+    def check_field(self):
+        past_positions = []
+        control_sum = 0
+        for position in self.positions:
+            temp = position
+            for elem in past_positions:
+                if elem < position:
+                    temp -= 1
+            control_sum += temp
+            past_positions.append(position)
+        if control_sum % 2 == 0:
+            return True
+        return False
+
 
     def change_pos(self, button, index):
         row, column = to_two_coords(self.positions[index])
@@ -50,5 +66,5 @@ class Application(tk.Frame):
                 self.new_field()
 
 app = Application()
-app.master.title('Sample application')
+app.master.title('15 Game')
 app.mainloop()
